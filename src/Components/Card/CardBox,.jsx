@@ -8,15 +8,11 @@ const newCard = ({ name, desc }) => {
     return (
         <Card>
             <CardContent>
-                <Typography>{name}</Typography>
-                <Typography>{desc}</Typography>
+                
             </CardContent>
-            <CardActions>
-                <Button></Button>
-            </CardActions>
         </Card>
     )
 }
 
 
-export default newCard()
+export default newCard

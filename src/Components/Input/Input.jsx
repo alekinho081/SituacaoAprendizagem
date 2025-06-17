@@ -1,10 +1,10 @@
 import TextField from "@mui/material/TextField";
 
-const Input = ({label , valor}) => {
+const newInput = ({label , aoMudar}) => {
     return(
-        <TextField label={label} value={valor} variant="outlined"></TextField>
+        <TextField label={label} onChange={aoMudar} variant="outlined"></TextField>
     )
 }
 
 
-export default Input()
+export default newInput

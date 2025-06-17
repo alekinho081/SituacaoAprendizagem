@@ -1,10 +1,22 @@
 import Typography from "@mui/material/Typography";
+import { useState } from "react";
 
 const Login = () => {
+    const [email, setEmail] = useState('')
+    const [senha, setSenha] = useState('')
+    const redirecionar = useNavigate()
+
+
     return (
-        <div>
-            <Typography>Pagina Login</Typography>
-        </div>
+        <newCard>
+            <form>
+                <newInput />
+                <newInput />
+                <newInput />
+                <newInput />
+                <newInput />
+            </form>
+        </newCard>
     )
 }
 
