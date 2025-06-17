@@ -11,15 +11,19 @@ const dbConfig = {
 };
 
 const sequelize = new Sequelize(dbConfig.name, dbConfig.user, dbConfig.password, {
-    host: dbConfig.host,
-    port: dbConfig.port,
     dialect: 'postgres',
-    logging: false,
-    define: {
-        ssl: false,
-        timestamps: true,
-        underscored: true,
-    }
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    dialectOptions: {
+        ssl: {
+            require: true,  
+            rejectUnauthorized: false 
+        }
+    },
+    logging: false,  
 });
 
 const Medico = sequelize.define('Medico', {
@@ -143,10 +147,10 @@ const Consulta = sequelize.define('Consulta', {
     freezeTableName: true,
     indexes: [
         {
-            fields: ['idMedico']
+            fields: ['medico_id']
         },
         {
-            fields: ['idPaciente']
+            fields: ['paciente_id']
         },
         {
             fields: ['data_hora']
@@ -170,7 +174,10 @@ async function runDatabaseOperations() {
         console.log('Conexão com o banco de dados estabelecida com sucesso.');
 
         // Sincroniza todos os modelos com o banco de dados (force: true apaga e recria as tabelas)
-        await sequelize.sync({ force: true });
+        await Medico.sync({force: true})
+        await Admin.sync({force: true})
+        await Paciente.sync({force: true})
+        await Consulta.sync({force: true})
         console.log('Todas as tabelas foram criadas com sucesso');
 
         // Criando médicos
@@ -183,7 +190,7 @@ async function runDatabaseOperations() {
 
         const medico2 = await Medico.create({
             nome: 'Dra. Maria Souza',
-            email: 'joao@gmail.com',
+            email: 'maria@gmail.com',
             especialidade: 'Pediatria',
             senha: 'senha456'
         });
