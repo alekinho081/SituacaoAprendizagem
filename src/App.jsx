@@ -1,6 +1,8 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Home from './Pages/HomePage/Home';
 import Cadastro from './Pages/CadastroPage/Cadastro';
+import Login from './Pages/LoginPage/Login';
+import Consulta from './Pages/ConsultaPage/Consulta';
 
 function App() {
   return (
