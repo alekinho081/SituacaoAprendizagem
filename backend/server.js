@@ -4,10 +4,10 @@ import medicoRouter from './rotas/medicoRotas.js';
 import pacienteRouter from './rotas/pacienteRotas.js';
 import adminRouter from './rotas/adminRotas.js';
 import { sequelize } from './config/db.js'; 
-
+import cors from 'cors'
 const app = express();
 
-
+app.use(cors())
 app.use(express.json());
 
 
