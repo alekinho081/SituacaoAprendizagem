@@ -13,7 +13,6 @@ function App() {
           <Route path='/' element={<Layout />} >
 
             <Route index element={< Home />} />
-
             
             <Route path='/consulta' element={<Consulta />} />
 
@@ -22,6 +21,7 @@ function App() {
 
           <Route path='/cadastro' element={<Cadastro />} />
           <Route path='/login' element={<Login />} />
+
 
 
 
