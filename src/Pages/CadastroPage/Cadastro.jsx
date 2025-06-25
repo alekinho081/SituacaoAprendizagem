@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import NewCard from "../../Components/Card/CardBox"
 import NewInput from "../../Components/Input/Input"
-import { Box, colors } from "@mui/material"
-
 
 const Cadastro = () => {
     const [nome, setNome] = useState('')
@@ -24,7 +22,7 @@ const Cadastro = () => {
             cpf,
             idade,
             senha
-        }
+        }   
 
         try {
             const resp = await fetch('http://localhost:5000/v1/pacientes', {
@@ -48,7 +46,6 @@ const Cadastro = () => {
         <NewCard sx={{ 
             width: 300, 
             padding: 20,
-            backgroundColor: '#1976d2' // Apenas esta linha muda a cor do card
         }}>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <Typography variant="h5" gutterBottom>Cadastro</Typography>

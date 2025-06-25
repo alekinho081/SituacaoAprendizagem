@@ -4,6 +4,7 @@ const Consulta = () => {
     return(
         <div>
             <Typography>Pagina Consulta</Typography>
+            
         </div>
     )
 }
