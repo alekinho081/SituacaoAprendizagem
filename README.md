@@ -1,12 +1,20 @@
-# React + Vite
+# Sistema de Gestão de Reservas para Clínica Médica
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🚀 Tecnologias Utilizadas
 
-Currently, two official plugins are available:
+### Frontend
+- **React** (com React Router, Context API e Hooks)
+- **Axios** para requisições HTTP
+- **Styled Components** ou **TailwindCSS** para estilização
+- **React Hook Form** para validação de formulários
+- **React Toastify** para notificações
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Backend
+- **Node.js** com **Express**
+- **Sequelize** como ORM para PostgreSQL
+- **JWT** para autenticação
+- **Nodemailer** para envio de e-mails
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Banco de Dados
+- **PostgreSQL** hospedado na Aiven
+- Modelagem com Sequelize
