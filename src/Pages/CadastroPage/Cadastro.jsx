@@ -1,9 +1,10 @@
 import Typography from "@mui/material/Typography"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, NavLink } from "react-router-dom"
 import { useState } from "react"
 import NewCard from "../../Components/Card/CardBox"
 import NewInput from "../../Components/Input/Input"
 import axios from 'axios'
+import Box from "@mui/material/Box"
 
 const Cadastro = () => {
     const [nome, setNome] = useState('')
@@ -35,20 +36,28 @@ const Cadastro = () => {
     }
 
     return (
-        <NewCard sx={{
-            width: 300,
-            padding: 20,
+        <Box sx={{
+            height: '100vh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
         }}>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <Typography variant="h5" gutterBottom>Cadastro</Typography>
-                <NewInput required label="Nome" aoMudar={(e) => setNome(e.target.value)} />
-                <NewInput required label="Email" aoMudar={(e) => setEmail(e.target.value)} />
-                <NewInput required label="CPF" aoMudar={(e) => setCPF(e.target.value)} />
-                <NewInput required label="Idade" aoMudar={(e) => setIdade(e.target.value)} />
-                <NewInput required label="Senha" aoMudar={(e) => setSenha(e.target.value)} />
-                <button type="submit" style={{ marginTop: '10px' }}>Cadastrar</button>
-            </form>
-        </NewCard>
+            <NewCard sx={{
+                width: 350,
+                padding: 2,
+            }}>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <Typography variant="h5" gutterBottom>Cadastro</Typography>
+                    <NewInput required label="Nome" aoMudar={(e) => setNome(e.target.value)} />
+                    <NewInput required label="Email" aoMudar={(e) => setEmail(e.target.value)} />
+                    <NewInput required label="CPF" aoMudar={(e) => setCPF(e.target.value)} />
+                    <NewInput required label="Idade" aoMudar={(e) => setIdade(e.target.value)} />
+                    <NewInput required label="Senha" aoMudar={(e) => setSenha(e.target.value)} />
+                    <NavLink to={'/login'}>Ja tenho uma conta</NavLink>
+                    <button type="submit" style={{ marginTop: '10px' }}>Cadastrar</button>
+                </form>
+            </NewCard>
+        </Box>
     );
 }
 

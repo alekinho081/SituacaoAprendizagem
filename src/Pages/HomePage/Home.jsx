@@ -1,11 +1,15 @@
+import NewHeader from "../../Components/Header/Header";
 import Typography from "@mui/material/Typography";
 
 const Home = () => {
-    return(
+    return (
         <div>
-            <Typography>Pagina Inicial</Typography>
+            <NewHeader />
+            <div style={{ padding: '20px' }}>
+                <Typography variant="body1">Inicio</Typography>
+            </div>
         </div>
-    )
-}
+    );
+};
 
 export default Home

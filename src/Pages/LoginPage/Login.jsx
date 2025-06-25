@@ -2,10 +2,14 @@ import NewCard from "../../Components/Card/CardBox";
 import NewInput from "../../Components/Input/Input";
 import axios from 'axios'
 import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import Box from "@mui/material/Box";
+
 
 const Login = () => {
     const [email, setEmail] = useState('')
     const [senha, setSenha] = useState('')
+    const redirecionar = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -16,10 +20,9 @@ const Login = () => {
         }
 
         try{
-            const resp = await axios.post('http://localhost:5000/login', {
-                params: userLogin
-            })
+            const resp = await axios.post('http://localhost:5000/login', userLogin)
             console.log(resp.data)
+            redirecionar('/')
         }catch (error){
             console.error('Erro ao fazer login:', error.response?.data || error.message);  
         }
@@ -27,14 +30,24 @@ const Login = () => {
 
 
     return (
-        <NewCard sx={{ width: 400, height: 200 }}>
-            <form onSubmit={handleSubmit}>
-                <NewInput required={true} label={'Email'} aoMudar={e => setEmail(e.target.value)} />
-                <NewInput required={true} label={'Senha'} aoMudar={e => setSenha(e.target.value)} />
-                <button type="submit" style={{ marginTop: '10px' }}>Logar</button>
+        <Box 
+          sx={{ 
+            height: '100vh', 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center' 
+          }}
+        >
+          <NewCard sx={{ width: 350, padding: 2 }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <NewInput required label="Email" aoMudar={e => setEmail(e.target.value)} />
+              <NewInput required label="Senha" aoMudar={e => setSenha(e.target.value)} />
+              <NavLink to={'/cadastro'}>Não tenho uma conta</NavLink>
+              <button type="submit" style={{ marginTop: '10px' }}>Logar</button>
             </form>
-        </NewCard>
-    )
+          </NewCard>
+        </Box>
+      );
 }
 
 export default Login
