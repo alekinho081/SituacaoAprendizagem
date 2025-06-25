@@ -3,6 +3,7 @@ import { Paciente } from '../config/db.js';
 import bcrypt from 'bcrypt';
 import { Op } from 'sequelize';
 
+
 const router_pacientes = express.Router();
 
 
@@ -74,7 +75,9 @@ router_pacientes.get('/pacientes', async (req, res) => {
 
 router_pacientes.get('/pacientes/:id', async (req, res) => {
     try {
-        const paciente = await Paciente.findByPk(req.params.id, {
+        const email = req.body
+
+        const paciente = await Paciente.findOne({where: {email: email}}, {
             attributes: { exclude: ['senha'] }
         });
 
@@ -148,5 +151,9 @@ router_pacientes.delete('/pacientes/:id', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+
+
+
 
 export default router_pacientes;
