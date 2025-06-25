@@ -4,7 +4,6 @@ import Typography from "@mui/material/Typography";
 const Home = () => {
     return (
         <div>
-            <NewHeader />
             <div style={{ padding: '20px' }}>
                 <Typography variant="body1">Inicio</Typography>
             </div>
