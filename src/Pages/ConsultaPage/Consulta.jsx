@@ -1,10 +1,10 @@
 import Typography from "@mui/material/Typography";
 
 const Consulta = () => {
-    return(
+    return (
         <div>
             <Typography>Pagina Consulta</Typography>
-            
+
         </div>
     )
 }

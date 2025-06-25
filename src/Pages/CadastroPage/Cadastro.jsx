@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import NewCard from "../../Components/Card/CardBox"
 import NewInput from "../../Components/Input/Input"
+import axios from 'axios'
 
 const Cadastro = () => {
     const [nome, setNome] = useState('')
@@ -22,29 +23,20 @@ const Cadastro = () => {
             cpf,
             idade,
             senha
-        }   
-
-        try {
-            const resp = await fetch('http://localhost:5000/v1/pacientes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(usuarios)
-            });
-            const data = await resp.json();
-            console.log('Usuario criado com sucesso')
-            redirecionar('/login')
-
-        } catch (error) {
-            console.error('Erro ao cadastrar usuario: ', error)
         }
 
-
+        try {
+            const resp = await axios.post('http://localhost:5000/v1/pacientes', usuarios);
+            console.log('Usuário criado com sucesso:', resp.data);
+            redirecionar('/login');
+        } catch (error) {
+            console.error('Erro ao cadastrar usuário:', error.response?.data || error.message);
+        }
     }
 
-
     return (
-        <NewCard sx={{ 
-            width: 300, 
+        <NewCard sx={{
+            width: 300,
             padding: 20,
         }}>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
