@@ -1,7 +1,8 @@
 import express from 'express';
-import { Paciente } from '../config/db.js';
+import { Paciente, Medico, Admin } from '../config/db.js';
 import bcrypt from 'bcrypt';
 import { Op } from 'sequelize';
+import jwt from 'jsonwebtoken'
 
 
 const router_pacientes = express.Router();
@@ -77,7 +78,7 @@ router_pacientes.get('/pacientes/:id', async (req, res) => {
     try {
         const email = req.body
 
-        const paciente = await Paciente.findOne({where: {email: email}}, {
+        const paciente = await Paciente.findOne({ where: { email: email } }, {
             attributes: { exclude: ['senha'] }
         });
 
@@ -155,44 +156,85 @@ router_pacientes.delete('/pacientes/:id', async (req, res) => {
 router_pacientes.post('/login', async (req, res) => {
     try {
         const { email, senha } = req.body;
-  
-        const paciente = await Paciente.findOne({ where: { email } });
-  
-        if (!paciente) {
-            return res.status(404).json({ error: 'Paciente não encontrado' });
+
+        
+        const [paciente, medico, admin] = await Promise.all([
+            Paciente.findOne({ where: { email } }),
+            Medico.findOne({ where: { email } }),
+            Admin.findOne({ where: { email } })
+        ]);
+
+
+        const usuario = paciente || medico || admin;
+        const tipoUsuario = paciente ? 'paciente' : medico ? 'medico' : admin ? 'admin' : null;
+
+        if (!usuario) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
         }
-  
-    
-        const senhaValida = await bcrypt.compare(senha, paciente.senha);
-  
+
+ 
+        const senhaValida = await bcrypt.compare(senha, usuario.senha);
         if (!senhaValida) {
             return res.status(401).json({ error: 'Senha incorreta' });
         }
-  
+
         const token = jwt.sign(
-            { id: paciente.id }, 
+            { 
+                id: usuario.id,
+                tipo: tipoUsuario,  
+                email: usuario.email
+            },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
-  
+
+
         res.cookie('jwt', token, {
-          httpOnly: true,
-          secure: true, 
-          sameSite: 'lax', 
-          maxAge: 3600000
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+            maxAge: 3600000
         });
-  
-        res.json({
-            id: paciente.id,
-            token,
-            nome: paciente.nome,
-            email: paciente.email,
-        });
-  
+
+        const responseData = {
+            id: usuario.id,
+            tipo: tipoUsuario,
+            nome: usuario.nome,
+            email: usuario.email,
+            ...(tipoUsuario === 'medico' && { especialidade: usuario.especialidade }),
+        };
+
+        res.json(responseData);
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-  }); 
+});
+
+
+router_pacientes.get('/check-auth', async (req, res) => {
+    try {
+      const token = req.cookies.jwt; 
+  
+      if (!token) {
+        return res.status(401).json({ isAuthenticated: false });
+      }
+  
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const paciente = await Paciente.findByPk(decoded.id);
+  
+      if (!paciente) {
+        return res.status(401).json({ isAuthenticated: false });
+      }
+  
+      res.json({ 
+        isAuthenticated: true,
+        user: { id: paciente.id, email: paciente.email, nome: paciente.nome }
+      });
+    } catch (error) {
+      res.status(401).json({ isAuthenticated: false });
+    }
+  });
 
 
 
