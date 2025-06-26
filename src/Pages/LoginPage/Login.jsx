@@ -20,7 +20,7 @@ const Login = () => {
         }
 
         try{
-            const resp = await axios.post('http://localhost:5000/login', userLogin)
+            const resp = await axios.post('http://localhost:5000/v1/login', userLogin)
             console.log(resp.data)
             redirecionar('/')
         }catch (error){

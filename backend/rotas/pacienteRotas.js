@@ -152,6 +152,47 @@ router_pacientes.delete('/pacientes/:id', async (req, res) => {
     }
 });
 
+router_pacientes.post('/login', async (req, res) => {
+    try {
+        const { email, senha } = req.body;
+  
+        const paciente = await Paciente.findOne({ where: { email } });
+  
+        if (!paciente) {
+            return res.status(404).json({ error: 'Paciente não encontrado' });
+        }
+  
+    
+        const senhaValida = await bcrypt.compare(senha, paciente.senha);
+  
+        if (!senhaValida) {
+            return res.status(401).json({ error: 'Senha incorreta' });
+        }
+  
+        const token = jwt.sign(
+            { id: paciente.id }, 
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+  
+        res.cookie('jwt', token, {
+          httpOnly: true,
+          secure: true, 
+          sameSite: 'lax', 
+          maxAge: 3600000
+        });
+  
+        res.json({
+            id: paciente.id,
+            token,
+            nome: paciente.nome,
+            email: paciente.email,
+        });
+  
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+  }); 
 
 
 
