@@ -26,6 +26,7 @@ export default function NewHeader() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Clinica SESI
           </Typography>
+          
           <Button color="inherit" href='/login'>Login</Button>
         </Toolbar>
       </AppBar>
