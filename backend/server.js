@@ -6,16 +6,12 @@ import adminRouter from './rotas/adminRotas.js';
 import { sequelize } from './config/db.js'; 
 import cors from 'cors'
 import autenticar from './middlewares/authController.js';
-import { Paciente } from './config/db.js';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import cookieParser from 'cookie-parser';
+
 
 const app = express();
 
 app.use(cors())
 app.use(express.json());
-app.use(cookieParser());
 
 sequelize.authenticate()
   .then(() => console.log('✅ Conexão com o banco estabelecida'))

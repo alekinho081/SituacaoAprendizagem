@@ -2,6 +2,7 @@ import express from 'express';
 import { Paciente } from '../config/db.js';
 import bcrypt from 'bcrypt';
 import { Op } from 'sequelize';
+import jwt from 'jsonwebtoken'
 
 
 const router_pacientes = express.Router();
