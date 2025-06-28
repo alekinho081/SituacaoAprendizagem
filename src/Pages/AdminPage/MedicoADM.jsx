@@ -4,8 +4,7 @@ import Paper from "@mui/material/Paper"
 import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
 import ListItemText from "@mui/material/ListItemText"
-import Button from "@mui/material/Button"
-import TextField from "@mui/material/TextField"
+import Button from "@mui/material/Button" 
 import axios from "axios"
 import NewInput from "../../Components/Input/Input"
 
@@ -96,8 +95,9 @@ const AdminMedico = () => {
           <NewInput
           label={'Senha'}
           valor={medicoSenha}
+          tipo={'password'}
           aoMudar={(e) => setSenha(e.target.value)}
-          required={true}  
+          required={true} 
           />
 
           <Button variant="contained" color="primary" type="submit">
