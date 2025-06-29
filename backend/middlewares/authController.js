@@ -1,13 +1,13 @@
 import jwt from 'jsonwebtoken';
 
 function autenticar(req, res, next) {
-    const rotasPublicas = ['/login', '/pacientes', '/medicos', '/medicos/:id'];
+    const rotasPublicas = ['/login', '/pacientes', '/medicos'];
     
     if (rotasPublicas.includes(req.path)) {
         return next();
     }
     
-    const token = req.headers.authorization?.split(' ')[1]; 
+    const token = req.cookies?.jwt; 
 
 
     if (!token) {

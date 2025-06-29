@@ -7,9 +7,9 @@ import ListItemText from "@mui/material/ListItemText"
 import Button from "@mui/material/Button" 
 import axios from "axios"
 import NewInput from "../../../Components/Input/Input"
-import IconButton from "@mui/material/IconButton"
 import EditButton from "../../../Components/Buttons/EditButton/EditButton"
 import DeleteButton from "../../../Components/Buttons/DeleteButton/DelButton"
+import TelaDialog from "../../../Components/Dialog/TelaDialog"
 
 const AdminMedico = () => {
   const [medicos, setMedicos] = useState([])
@@ -19,8 +19,16 @@ const AdminMedico = () => {
   const [medicoEmail, setEmail] = useState('')
   const [medicoSenha, setSenha] = useState('')
 
-
+  const [showDialog, setShowDialog] = useState(false)
   const [showForm, setShowForm] = useState(false)
+
+  const abreDialog = () => {
+    setShowDialog(true)
+  }
+
+  const fechaDialog = () => {
+    setShowDialog(false)
+  }
 
   const mostraMedicos = async () => {
     try {
@@ -30,6 +38,8 @@ const AdminMedico = () => {
       console.error('Erro ao buscar medicos: ', error)
     }
   }
+
+
 
   const newMedicos = {
     nome: medicoNome,
@@ -57,13 +67,15 @@ const AdminMedico = () => {
   }
 
     const deletarMedico = async (id) => {
-        try{
-          await axios.delete(`http://localhost:5000/v1/medicos/${id}`)
-          mostraMedicos()
-        }catch (error){
-          console.error('Erro ao deletar medico: ', error)
-        }
-    }
+  try {
+    await axios.delete(`http://localhost:5000/v1/medicos/${id}`, {
+      withCredentials: true
+    });
+    mostraMedicos();
+  } catch (error) {
+    console.error('Erro ao deletar médico:', error.response?.data || error.message);
+  }
+}
 
   useEffect(() => {
     mostraMedicos()
@@ -126,7 +138,18 @@ const AdminMedico = () => {
                 primary={`${medico.nome} (${medico.especialidade})`}
               />
               <DeleteButton onClick={() => deletarMedico(medico.id)}/>
-              <EditButton/>
+              <EditButton 
+                onClick={abreDialog}
+              />
+              <TelaDialog abre={showDialog} onClose={fechaDialog}>
+                <form>
+                  <NewInput/>
+                  <NewInput/>
+                  <NewInput/>
+                  <NewInput/>
+                </form>
+              </TelaDialog>
+
             </ListItem>
           ))}   
         </List>
