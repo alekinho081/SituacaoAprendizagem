@@ -5,6 +5,8 @@ const Consulta = () => {
         <div>
             <Typography>Pagina Consulta</Typography>
 
+
+
         </div>
     )
 }

@@ -6,7 +6,10 @@ import ListItem from "@mui/material/ListItem"
 import ListItemText from "@mui/material/ListItemText"
 import Button from "@mui/material/Button" 
 import axios from "axios"
-import NewInput from "../../Components/Input/Input"
+import NewInput from "../../../Components/Input/Input"
+import IconButton from "@mui/material/IconButton"
+import EditButton from "../../../Components/Buttons/EditButton/EditButton"
+import DeleteButton from "../../../Components/Buttons/DeleteButton/DelButton"
 
 const AdminMedico = () => {
   const [medicos, setMedicos] = useState([])
@@ -52,6 +55,15 @@ const AdminMedico = () => {
       console.error('Erro ao adicionar medico: ', error)
     }
   }
+
+    const deletarMedico = async (id) => {
+        try{
+          await axios.delete(`http://localhost:5000/v1/medicos/${id}`)
+          mostraMedicos()
+        }catch (error){
+          console.error('Erro ao deletar medico: ', error)
+        }
+    }
 
   useEffect(() => {
     mostraMedicos()
@@ -113,6 +125,8 @@ const AdminMedico = () => {
               <ListItemText
                 primary={`${medico.nome} (${medico.especialidade})`}
               />
+              <DeleteButton onClick={() => deletarMedico(medico.id)}/>
+              <EditButton/>
             </ListItem>
           ))}   
         </List>

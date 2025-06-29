@@ -17,10 +17,10 @@ sequelize.authenticate()
   .then(() => console.log('✅ Conexão com o banco estabelecida'))
   .catch(err => console.error('❌ Erro ao conectar ao banco:', err));
 
-app.use('/v1', autenticar,consultaRouter);
-app.use('/v1',medicoRouter);
-app.use('/v1', autenticar,pacienteRouter);
-app.use('/v1', autenticar,adminRouter);
+app.use('/v1', autenticar, consultaRouter);
+app.use('/v1', medicoRouter);
+app.use('/v1', autenticar, pacienteRouter);
+app.use('/v1', autenticar, adminRouter);
 
 
 

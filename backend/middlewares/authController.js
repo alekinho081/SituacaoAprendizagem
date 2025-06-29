@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 function autenticar(req, res, next) {
-    const rotasPublicas = ['/login', '/pacientes', '/medicos'];
+    const rotasPublicas = ['/login', '/pacientes', '/medicos', '/medicos/:id'];
     
     if (rotasPublicas.includes(req.path)) {
         return next();
