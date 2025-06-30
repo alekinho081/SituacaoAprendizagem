@@ -10,7 +10,29 @@ const EspPage = () => {
     const mostraEspecialidades = async () => {
         try {
             const resp = await axios.get("http://localhost:5000/v1/medicos");
-            setEsp(resp.data);
+
+            // Agrupar por especialidade
+            const agrupado = {};
+
+            resp.data.forEach((medico) => {
+                const esp = medico.especialidade;
+
+                if (esp in agrupado) {
+                    agrupado[esp]++;
+                } else {
+                    agrupado[esp] = 1;
+                }
+            });
+
+            // Transformar em lista de objetos
+            const listaEspecialidades = Object.entries(agrupado).map(
+                ([especialidade, qtd_medicos]) => ({
+                    especialidade,
+                    qtd_medicos,
+                })
+            );
+
+            setEsp(listaEspecialidades);
         } catch (error) {
             console.error("Erro ao buscar especialidades: ", error);
         }
@@ -23,7 +45,7 @@ const EspPage = () => {
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4" style={{ fontFamily: 'system-ui, sans-serif' }}>
             <div className="bg-white rounded-2xl shadow-lg p-6 w-full" style={{ maxWidth: '1200px' }}>
-                <Typography fontSize={25} className="mb-8 text-center" marginBottom={5} marginTop={2}>
+                <Typography fontSize={25} className="mb-8 text-center" marginBottom={5}>
                     Especialidades
                 </Typography>
 
@@ -63,15 +85,27 @@ const EspPage = () => {
                                 textAlign="center"
                                 sx={{ 
                                     color: '#1976d2',
-                                    marginBottom: 2
+                                    marginBottom: 1
                                 }}
                             >
                                 {esp.especialidade}
                             </Typography>
+                            <Typography fontSize={15} textAlign={"center"}>
+                                Medicos disponiveis para essa especialidade:
+                            </Typography>
+                            <Typography 
+                                fontSize={16}
+                                color="textSecondary"
+                                textAlign="center"
+                                sx={{ marginBottom: 2 }}
+                            >
+                                {esp.qtd_medicos} médico{esp.qtd_medicos !== 1 ? 's' : ''}
+                            </Typography>
                     
                             <Button
                                 variant="contained"
-                                sx={{ 
+                                sx={{
+                                    marginLeft: 4, 
                                     borderRadius: "0.5rem", 
                                     textTransform: "none",
                                     backgroundColor: '#1976d2',
