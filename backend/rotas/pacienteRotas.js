@@ -236,6 +236,11 @@ router_pacientes.get('/check-auth', async (req, res) => {
     }
   });
 
+router_pacientes.get('/logout', (req, res) => {
+  res.clearCookie('jwt'); 
+  res.status(200).json({ message: 'Logout successful' });
+});
+
 
 
 
