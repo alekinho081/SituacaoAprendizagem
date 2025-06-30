@@ -79,10 +79,6 @@ router_medicos.get('/medicos/:id', async (req, res) => {
 router_medicos.patch('/medicos/:id', async (req, res) => {
     try {
 
-        if (req.body.email) {
-            return res.status(400).json({ error: 'Atualização de email não permitida' });
-        }
-
 
         if (req.body.senha) {
             req.body.senha = await bcrypt.hash(req.body.senha, 10);

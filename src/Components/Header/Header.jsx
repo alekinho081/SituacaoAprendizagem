@@ -48,8 +48,9 @@ export default function NewHeader() {
  if(tipo === 'admin'){
     drawerItems = [
     { text: 'Início', icon: <HomeIcon />, path: '/' },
-    { text: 'Usuarios', icon: <AccountCircleIcon />, path: '/admin' },
-    { text: 'Contato', icon: <ContactMailIcon />, path: '/contact' },
+    { text: 'Pacientes', icon: <AccountCircleIcon />, path: '/admin-paciente' },
+    { text: 'Médicos', icon: <AccountCircleIcon />, path: '/admin-medico' },
+    { text: 'Consultas', icon: <ContactMailIcon />, path: '/admin-consulta' }
   ];
 }else if( tipo === 'paciente'){
   drawerItems = [

@@ -4,7 +4,6 @@ import Cadastro from './Pages/CadastroPage/Cadastro';
 import Login from './Pages/LoginPage/Login';
 import Consulta from './Pages/ConsultaPage/Consulta';
 import Layout from './layout/Layout';
-import AdminPage from './Pages/AdminPage/Admin';
 import AdminMedico from './Pages/AdminPage/MedicPageADM/MedicoADM';
 import AdminConsulta from './Pages/AdminPage/ConsultaPageADM/ConsultaADM'
 import AdminPaciente from './Pages/AdminPage/PacientePageADM/PacienteADM'
@@ -20,7 +19,7 @@ function App() {
             <Route path='/admin-medico' element={<AdminMedico />} />
             <Route path='/admin-paciente' element={<AdminPaciente />} />
             <Route path='/admin-consulta' element={<AdminConsulta />} />
-            <Route path='/admin' element={<AdminPage />} />
+           
 
           </Route>
 

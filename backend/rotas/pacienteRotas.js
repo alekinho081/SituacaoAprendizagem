@@ -100,7 +100,6 @@ router_pacientes.patch('/pacientes/:id', async (req, res) => {
             return res.status(400).json({ error: 'Atualização de CPF não permitida' });
         }
 
-
         if (req.body.email) {
             const pacienteComEmail = await Paciente.findOne({
                 where: {
@@ -119,6 +118,7 @@ router_pacientes.patch('/pacientes/:id', async (req, res) => {
             req.body.senha = await bcrypt.hash(req.body.senha, 10);
         }
 
+
         const [updated] = await Paciente.update(req.body, {
             where: { id: req.params.id }
         });
@@ -135,7 +135,6 @@ router_pacientes.patch('/pacientes/:id', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
 
 router_pacientes.delete('/pacientes/:id', async (req, res) => {
     try {
