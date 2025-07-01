@@ -11,8 +11,7 @@ const EspPage = () => {
         try {
             const resp = await axios.get("http://localhost:5000/v1/medicos");
 
-            // Agrupar por especialidade
-            const agrupado = {};
+                  const agrupado = {};
 
             resp.data.forEach((medico) => {
                 const esp = medico.especialidade;
@@ -24,7 +23,7 @@ const EspPage = () => {
                 }
             });
 
-            // Transformar em lista de objetos
+         
             const listaEspecialidades = Object.entries(agrupado).map(
                 ([especialidade, qtd_medicos]) => ({
                     especialidade,

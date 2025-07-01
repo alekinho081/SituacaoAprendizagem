@@ -108,7 +108,7 @@ router_medicos.put('/medicos/:id', async (req, res) => {
         if (!req.body.nome || !req.body.email || !req.body.senha) {
             return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
         }
-
+q
         const medico = await Medico.findByPk(req.params.id);
         if (!medico) {
             return res.status(404).json({ error: 'Médico não encontrado' });
