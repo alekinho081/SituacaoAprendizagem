@@ -1,12 +1,49 @@
 import express from 'express';
-import { Consulta } from '../config/db.js';
+import { Consulta, Medico, Paciente } from '../config/db.js';
+import { Op } from 'sequelize';
 
 const router_consultas = express.Router();
 
 router_consultas.get('/consultas', async (req, res) => {
     try {
-        const consultas = await Consulta.findAll();
-        res.json(consultas);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const offset = (page - 1) * limit;
+        
+   
+        const where = {};
+        if (req.query.status) {
+            where.status = req.query.status;
+        }
+        if (req.query.data_inicio && req.query.data_fim) {
+            where.data_hora = {
+                [Op.between]: [new Date(req.query.data_inicio), new Date(req.query.data_fim)]
+            };
+        }
+
+        const { count, rows } = await Consulta.findAndCountAll({
+            where,
+            limit,
+            offset,
+            order: [['data_hora', 'DESC']],
+            include: [
+                {
+                    model: Medico,
+                    attributes: ['id', 'nome', 'especialidade']
+                },
+                {
+                    model: Paciente,
+                    attributes: ['id', 'nome', 'cpf']
+                }
+            ]
+        });
+        
+        res.json({
+            consultas: rows,
+            total: count,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -15,7 +52,19 @@ router_consultas.get('/consultas', async (req, res) => {
 
 router_consultas.get('/consultas/:id', async (req, res) => {
     try {
-        const consulta = await Consulta.findByPk(req.params.id);
+        const consulta = await Consulta.findByPk(req.params.id, {
+            include: [
+                {
+                    model: Medico,
+                    attributes: ['id', 'nome', 'especialidade', 'email']
+                },
+                {
+                    model: Paciente,
+                    attributes: ['id', 'nome', 'cpf', 'email', 'idade']
+                }
+            ]
+        });
+        
         if (consulta) {
             res.json(consulta);
         } else {
@@ -26,10 +75,32 @@ router_consultas.get('/consultas/:id', async (req, res) => {
     }
 });
 
-
 router_consultas.post('/consultas', async (req, res) => {
     try {
-        const consulta = await Consulta.create(req.body);
+   
+        if (!req.body.data_hora || !req.body.medico_id || !req.body.paciente_id) {
+            return res.status(400).json({ error: 'Data/hora, médico e paciente são obrigatórios' });
+        }
+
+        const conflito = await Consulta.findOne({
+            where: {
+                medico_id: req.body.medico_id,
+                data_hora: req.body.data_hora,
+                status: {
+                    [Op.not]: 'cancelada'
+                }
+            }
+        });
+
+        if (conflito) {
+            return res.status(400).json({ error: 'Médico já possui consulta neste horário' });
+        }
+
+        const consulta = await Consulta.create({
+            ...req.body,
+            status: 'agendada' // Status padrão
+        });
+        
         res.status(201).json(consulta);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -39,15 +110,42 @@ router_consultas.post('/consultas', async (req, res) => {
 
 router_consultas.patch('/consultas/:id', async (req, res) => {
     try {
-        const [updated] = await Consulta.update(req.body, {
+        const consulta = await Consulta.findByPk(req.params.id);
+        if (!consulta) {
+            return res.status(404).json({ error: 'Consulta não encontrada' });
+        }
+
+  
+        if (req.body.medico_id && req.body.medico_id !== consulta.medico_id) {
+            return res.status(400).json({ error: 'Não é permitido alterar o médico da consulta' });
+        }
+
+        if (req.body.paciente_id && req.body.paciente_id !== consulta.paciente_id) {
+            return res.status(400).json({ error: 'Não é permitido alterar o paciente da consulta' });
+        }
+
+       
+        const camposPermitidos = ['data_hora', 'status', 'motivo', 'diagnostico', 'prescricao', 'observacoes', 'valor'];
+        const dadosAtualizacao = {};
+        
+        camposPermitidos.forEach(campo => {
+            if (req.body[campo] !== undefined) {
+                dadosAtualizacao[campo] = req.body[campo];
+            }
+        });
+
+        await Consulta.update(dadosAtualizacao, {
             where: { id: req.params.id }
         });
-        if (updated) {
-            const updatedConsulta = await Consulta.findByPk(req.params.id);
-            res.json(updatedConsulta);
-        } else {
-            res.status(404).json({ error: 'Consulta não encontrada' });
-        }
+
+        const updatedConsulta = await Consulta.findByPk(req.params.id, {
+            include: [
+                { model: Medico, attributes: ['nome'] },
+                { model: Paciente, attributes: ['nome'] }
+            ]
+        });
+        
+        res.json(updatedConsulta);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -56,14 +154,18 @@ router_consultas.patch('/consultas/:id', async (req, res) => {
 
 router_consultas.delete('/consultas/:id', async (req, res) => {
     try {
-        const deleted = await Consulta.destroy({
-            where: { id: req.params.id }
-        });
-        if (deleted) {
-            res.status(204).send();
-        } else {
-            res.status(404).json({ error: 'Consulta não encontrada' });
+        const consulta = await Consulta.findByPk(req.params.id);
+        
+        if (!consulta) {
+            return res.status(404).json({ error: 'Consulta não encontrada' });
         }
+
+        if (consulta.status === 'realizada') {
+            return res.status(400).json({ error: 'Não é possível excluir consultas já realizadas' });
+        }
+
+        await consulta.destroy();
+        res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
