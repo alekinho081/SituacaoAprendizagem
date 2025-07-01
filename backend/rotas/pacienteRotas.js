@@ -60,6 +60,58 @@ router_pacientes.post('/pacientes', async (req, res) => {
     }
 });
 
+router_pacientes.put('/pacientes/:id', async (req, res) => {
+    try {
+
+        if (!req.body.nome || !req.body.email || !req.body.senha) {
+            return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
+        }
+
+  
+        const paciente = await Paciente.findByPk(req.params.id);
+        if (!paciente) {
+            return res.status(404).json({ error: 'Paciente não encontrado' });
+        }
+
+    
+        if (req.body.email !== paciente.email) {
+            const emailExistente = await Paciente.findOne({
+                where: {
+                    email: req.body.email,
+                    id: { [Op.ne]: req.params.id }
+                }
+            });
+            if (emailExistente) {
+                return res.status(400).json({ error: 'Email já está em uso' });
+            }
+        }
+
+
+        const hashedSenha = await bcrypt.hash(req.body.senha, 10);
+
+
+        paciente.nome = req.body.nome;
+        paciente.email = req.body.email;
+        paciente.senha = hashedSenha;
+
+        await paciente.save();
+
+
+        const pacienteResponse = {
+            id: paciente.id,
+            nome: paciente.nome,
+            cpf: paciente.cpf,
+            email: paciente.email,
+            idade: paciente.idade,
+            createdAt: paciente.createdAt,
+            updatedAt: paciente.updatedAt
+        };
+
+        res.json(pacienteResponse);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 router_pacientes.get('/pacientes', async (req, res) => {
     try {
@@ -93,48 +145,7 @@ router_pacientes.get('/pacientes/:id', async (req, res) => {
 });
 
 
-router_pacientes.patch('/pacientes/:id', async (req, res) => {
-    try {
 
-        if (req.body.cpf) {
-            return res.status(400).json({ error: 'Atualização de CPF não permitida' });
-        }
-
-        if (req.body.email) {
-            const pacienteComEmail = await Paciente.findOne({
-                where: {
-                    email: req.body.email,
-                    id: { [Op.ne]: req.params.id }
-                }
-            });
-
-            if (pacienteComEmail) {
-                return res.status(400).json({ error: 'Email já está em uso' });
-            }
-        }
-
-
-        if (req.body.senha) {
-            req.body.senha = await bcrypt.hash(req.body.senha, 10);
-        }
-
-
-        const [updated] = await Paciente.update(req.body, {
-            where: { id: req.params.id }
-        });
-
-        if (updated) {
-            const pacienteAtualizado = await Paciente.findByPk(req.params.id, {
-                attributes: { exclude: ['senha'] }
-            });
-            res.json(pacienteAtualizado);
-        } else {
-            res.status(404).json({ error: 'Paciente não encontrado' });
-        }
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
 
 router_pacientes.delete('/pacientes/:id', async (req, res) => {
     try {
