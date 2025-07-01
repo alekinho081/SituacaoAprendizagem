@@ -4,15 +4,17 @@ import Paper from "@mui/material/Paper"
 import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
 import ListItemText from "@mui/material/ListItemText"
-import Button from "@mui/material/Button" 
+import Button from "@mui/material/Button"
 import axios from "axios"
 import NewInput from "../../../Components/Input/Input"
 import EditButton from "../../../Components/Buttons/EditButton/EditButton"
 import DeleteButton from "../../../Components/Buttons/DeleteButton/DelButton"
 import TelaDialog from "../../../Components/Dialog/TelaDialog"
+import Cookies from 'js-cookie'
 
 const AdminMedico = () => {
   const [medicos, setMedicos] = useState([])
+  const [medicoEditando, setMedicoEditando] = useState(null)
 
   const [medicoNome, setNome] = useState('')
   const [medicoEsp, setEsp] = useState('')
@@ -22,13 +24,16 @@ const AdminMedico = () => {
   const [showDialog, setShowDialog] = useState(false)
   const [showForm, setShowForm] = useState(false)
 
-  const abreDialog = () => {
+  const abreDialog = (medico) => {
+    setMedicoEditando(medico);
     setShowDialog(true)
   }
 
   const fechaDialog = () => {
     setShowDialog(false)
   }
+
+  axios.defaults.withCredentials = true
 
   const mostraMedicos = async () => {
     try {
@@ -41,8 +46,8 @@ const AdminMedico = () => {
 
 
 
-  const newMedicos = {
-    nome: medicoNome,
+  const newMedico = {
+    nome: 'Dr. ' + medicoNome,
     especialidade: medicoEsp,
     email: medicoEmail,
     senha: medicoSenha,
@@ -52,9 +57,9 @@ const AdminMedico = () => {
     e.preventDefault()
 
     try {
-      await axios.post('http://localhost:5000/v1/medicos', newMedicos)
+      await axios.post('http://localhost:5000/v1/medicos', newMedico)
       mostraMedicos()
-      console.log('Medico adicionado com sucesso')  
+      console.log('Medico adicionado com sucesso')
       setNome('')
       setEsp('')
       setEmail('')
@@ -66,20 +71,48 @@ const AdminMedico = () => {
     }
   }
 
-    const deletarMedico = async (id) => {
-  try {
-    await axios.delete(`http://localhost:5000/v1/medicos/${id}`, {
-      withCredentials: true
-    });
-    mostraMedicos();
-  } catch (error) {
-    console.error('Erro ao deletar médico:', error.response?.data || error.message);
+  const deletarMedico = async (id) => {
+    try {
+      let jwt = Cookies.get('jwt')
+      await axios.delete(`http://localhost:5000/v1/medicos/${id}`, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`
+        }
+      });
+      mostraMedicos();
+    } catch (error) {
+      console.error('Erro ao deletar médico:', error.response?.data || error.message);
+    }
   }
-}
 
   useEffect(() => {
     mostraMedicos()
   }, [])
+
+  const handleAtualizaSubmit = async (e) => {
+    try {
+      let jwt = Cookies.get('jwt')
+      const medicoAtualizado = {
+        nome: 'Dr. ' + medicoNome,
+        especialidade: medicoEsp,
+        email: medicoEmail,
+        senha: medicoSenha || undefined
+      };
+      await axios.put(`http://localhost:5000/v1/medicos/${medicoEditando.id}`, medicoAtualizado, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`
+        }
+       
+      })
+      mostraMedicos()
+    }catch (error){
+      console.error('Erro ao atualizar médico:', error.response?.data || error.message);
+    }
+  }
 
   return (
     <div>
@@ -99,29 +132,29 @@ const AdminMedico = () => {
       {showForm && (
         <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
           <NewInput
-          label={'Nome'}
-          valor={medicoNome}
-          aoMudar={(e) => setNome(e.target.value)}
-          required={true}  
+            label={'Nome'}
+            valor={medicoNome}
+            aoMudar={(e) => setNome(e.target.value)}
+            required={true}
           />
           <NewInput
-          label={'Especialidade'}
-          valor={medicoEsp}
-          aoMudar={(e) => setEsp(e.target.value)}
-          required={true}  
+            label={'Especialidade'}
+            valor={medicoEsp}
+            aoMudar={(e) => setEsp(e.target.value)}
+            required={true}
           />
           <NewInput
-          label={'Email'}
-          valor={medicoEmail}
-          aoMudar={(e) => setEmail(e.target.value)}
-          required={true}  
+            label={'Email'}
+            valor={medicoEmail}
+            aoMudar={(e) => setEmail(e.target.value)}
+            required={true}
           />
           <NewInput
-          label={'Senha'}
-          valor={medicoSenha}
-          tipo={'password'}
-          aoMudar={(e) => setSenha(e.target.value)}
-          required={true} 
+            label={'Senha'}
+            valor={medicoSenha}
+            tipo={'password'}
+            aoMudar={(e) => setSenha(e.target.value)}
+            required={true}
           />
 
           <Button variant="contained" color="primary" type="submit">
@@ -136,22 +169,48 @@ const AdminMedico = () => {
             <ListItem key={medico.id}>
               <ListItemText
                 primary={`${medico.nome} (${medico.especialidade})`}
+                secondary={`Email: ${medico.email}`}
               />
-              <DeleteButton onClick={() => deletarMedico(medico.id)}/>
-              <EditButton 
-                onClick={abreDialog}
+              <DeleteButton onClick={() => deletarMedico(medico.id)} />
+              <EditButton
+                onClick={() => {abreDialog(medico)}}
               />
-              <TelaDialog abre={showDialog} onClose={fechaDialog}>
-                <form>
-                  <NewInput/>
-                  <NewInput/>
-                  <NewInput/>
-                  <NewInput/>
+              <TelaDialog abre={showDialog} onClose={fechaDialog} title="Editar Médico" disableEnforceFocus>
+                <form onSubmit={handleAtualizaSubmit}>
+                  <NewInput
+                    label={'Nome'}
+                    value={medicoNome}
+                    aoMudar={(e) => setNome(e.target.value)}
+                    required={true}
+                  /><br />
+                  <NewInput
+                    label={'Email'}
+                    value={medicoEmail}
+                    aoMudar={(e) => setEmail(e.target.value)}
+                    required={true}
+                  /><br />
+                  <NewInput
+                    label={'Especialidade'}
+                    value={medicoEsp}
+                    aoMudar={(e) => setEsp(e.target.value)}
+                    required={true}
+                  /><br />
+                  <NewInput
+                    label={'Senha'}
+                    value={medicoSenha}
+                    type={'password'}
+                    aoMudar={(e) => setSenha(e.target.value)}
+                    required={true}
+                  /><br />
+
+                  <Button  variant="contained" color="primary" type="submit">
+                    Atualizar
+                  </Button>
                 </form>
               </TelaDialog>
 
             </ListItem>
-          ))}   
+          ))}
         </List>
       </Paper>
     </div>
