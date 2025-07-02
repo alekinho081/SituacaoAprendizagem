@@ -30,7 +30,7 @@ const ConsultasPage = () => {
     { value: 'cancelada', label: 'Cancelada' }
   ];
 
-  // Configuração do Axios para incluir o token automaticamente
+
   const api = axios.create({
     baseURL: 'http://localhost:5000/v1',
     withCredentials: true
@@ -53,7 +53,7 @@ const ConsultasPage = () => {
           message: 'Sessão expirada. Por favor, faça login novamente.',
           severity: 'error'
         });
-        // Redirecionar para login se necessário
+
       }
       return Promise.reject(error);
     }
@@ -77,14 +77,14 @@ const ConsultasPage = () => {
   };
 
   useEffect(() => {
-    // Busca inicial
+
     fetchConsultas();
 
-    // Configura atualização automática a cada 30 segundos
+
     const interval = setInterval(fetchConsultas, 30000);
     setRefetchInterval(interval);
 
-    // Limpa o intervalo quando o componente é desmontado
+
     return () => clearInterval(interval);
   }, []);
 
@@ -116,8 +116,7 @@ const ConsultasPage = () => {
         message: 'Consulta atualizada com sucesso!',
         severity: 'success'
       });
-      
-      // Atualiza imediatamente após salvar
+ 
       fetchConsultas();
       handleCloseDialog();
     } catch (error) {
@@ -264,7 +263,6 @@ const ConsultasPage = () => {
           </div>
         )}
 
-        {/* Dialog de Edição */}
         <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="md">
           <DialogTitle>Editar Consulta</DialogTitle>
           <DialogContent>
@@ -405,7 +403,7 @@ const ConsultasPage = () => {
           </DialogActions>
         </Dialog>
 
-        {/* Snackbar para feedback */}
+      
         <Snackbar
           open={snackbar.open}
           autoHideDuration={6000}

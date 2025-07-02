@@ -19,7 +19,7 @@ import ContactMailIcon from '@mui/icons-material/ContactMail';
 import { useContext } from 'react';
 import { AuthContext } from '../../authContext/AuthContext';
 import axios from 'axios';
-
+import ExplicitIcon from '@mui/icons-material/Explicit';
 
 export default function NewHeader() {
   const { user, setUser } = useContext(AuthContext);
@@ -50,12 +50,19 @@ export default function NewHeader() {
     { text: 'Início', icon: <HomeIcon />, path: '/' },
     { text: 'Pacientes', icon: <AccountCircleIcon />, path: '/admin-paciente' },
     { text: 'Médicos', icon: <AccountCircleIcon />, path: '/admin-medico' },
+    { text: 'Especialidades', icon: <ExplicitIcon />, path: '/especialidades' },
     { text: 'Consultas', icon: <ContactMailIcon />, path: '/admin-consulta' }
   ];
 }else if( tipo === 'paciente'){
   drawerItems = [
     { text: 'Início', icon: <HomeIcon />, path: '/' },
-    { text: 'Consultas', icon: <AccountCircleIcon />, path: '/consultas' },
+    { text: 'Especialidades', icon: <ExplicitIcon />, path: '/especialidades' },
+    { text: 'Contato', icon: <ContactMailIcon />, path: '/contact' },
+  ];
+}else if( tipo === 'medico'){
+  drawerItems = [
+    { text: 'Início', icon: <HomeIcon />, path: '/' },
+    { text: 'Especialidades', icon: <ExplicitIcon />, path: '/especialidades' },
     { text: 'Contato', icon: <ContactMailIcon />, path: '/contact' },
   ];
 }
