@@ -1,17 +1,64 @@
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
+import {
+    Typography,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
+    MenuItem,
+    Snackbar,
+    Alert,
+    CircularProgress
+} from '@mui/material';
+
 import NewCard from "../../Components/Card/CardBox";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import NewInput from "../../Components/Input/Input"
+import EditButton from "../../Components/Buttons/EditButton/EditButton"
+import DeleteButton from "../../Components/Buttons/DeleteButton/DelButton"
+import TelaDialog from "../../Components/Dialog/TelaDialog"
 
 const EspPage = () => {
+    
+    const [currentConsulta, setCurrentConsulta] = useState(null);
     const [especialidades, setEsp] = useState([]);
+    const [showDialog, setShowDialog] = useState(false)
+    const [medicos, setMedicos] = useState([])
+    const [espMedicos, setEspMedicos] = useState([])
+    const [currentMedico, setCurrentMedico] = useState('')
+
+    const abreDialog = (especialidade) => {
+        let medics = medicos
+            .filter(medico => medico.especialidade == especialidade)
+            .map(medico => {
+                return { nome: medico.nome, id: medico.id };
+            });
+        setEspMedicos(medics)
+        setShowDialog(true)
+        console.log(medics)
+    }
+
+    const fechaDialog = () => {
+        setShowDialog(false)
+    }
+
+
+    const handleInputChange = (e) => {
+        const { nome, value } = e.target;
+        setCurrentMedico(e.target.value)
+        console.log(e.target.value)
+    };
+
 
     const mostraEspecialidades = async () => {
         try {
             const resp = await axios.get("http://localhost:5000/v1/medicos");
 
-                  const agrupado = {};
+            setMedicos(resp.data)
+
+            const agrupado = {};
 
             resp.data.forEach((medico) => {
                 const esp = medico.especialidade;
@@ -23,7 +70,7 @@ const EspPage = () => {
                 }
             });
 
-         
+
             const listaEspecialidades = Object.entries(agrupado).map(
                 ([especialidade, qtd_medicos]) => ({
                     especialidade,
@@ -48,8 +95,8 @@ const EspPage = () => {
                     Especialidades
                 </Typography>
 
-                <div 
-                    style={{ 
+                <div
+                    style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(4, 1fr)',
                         gap: '24px',
@@ -78,11 +125,11 @@ const EspPage = () => {
                                 }
                             }}
                         >
-                            <Typography 
-                                fontSize={20} 
-                                fontWeight="bold" 
+                            <Typography
+                                fontSize={20}
+                                fontWeight="bold"
                                 textAlign="center"
-                                sx={{ 
+                                sx={{
                                     color: '#1976d2',
                                     marginBottom: 1
                                 }}
@@ -92,7 +139,7 @@ const EspPage = () => {
                             <Typography fontSize={15} textAlign={"center"}>
                                 Medicos disponiveis para essa especialidade:
                             </Typography>
-                            <Typography 
+                            <Typography
                                 fontSize={16}
                                 color="textSecondary"
                                 textAlign="center"
@@ -100,12 +147,12 @@ const EspPage = () => {
                             >
                                 {esp.qtd_medicos} médico{esp.qtd_medicos !== 1 ? 's' : ''}
                             </Typography>
-                    
+
                             <Button
                                 variant="contained"
                                 sx={{
-                                    marginLeft: 4, 
-                                    borderRadius: "0.5rem", 
+                                    marginLeft: 4,
+                                    borderRadius: "0.5rem",
                                     textTransform: "none",
                                     backgroundColor: '#1976d2',
                                     '&:hover': {
@@ -113,11 +160,59 @@ const EspPage = () => {
                                     },
                                     padding: '8px 24px'
                                 }}
+                                onClick={() => { abreDialog(esp.especialidade) }}
                             >
                                 Marcar Consulta
                             </Button>
                         </NewCard>
+
                     ))}
+                    <TelaDialog abre={showDialog} onClose={fechaDialog} title="Marcar consulta" disableEnforceFocus>
+                        <form >
+                            <TextField
+                                label={'Motivo'}
+                                onChange={(e) => console.log(e.target.value)}
+                                required={true}
+                                sx={{ mb: 2 }}
+                                fullWidth
+                            />
+                            <TextField
+                                select
+                                label="Medico"
+                                name="Medico"
+                                value={currentMedico}
+                                onChange={handleInputChange}
+
+                                variant="outlined"
+                                fullWidth
+                                sx={{ mb: 2 }}
+                            >
+                                {espMedicos.map((medico) => (
+                                    <MenuItem key={medico.id} value={medico.nome}>
+                                        {medico.nome}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                            <TextField
+                                label="Data e Hora"
+                                type="datetime-local"
+                                name="data_hora"
+                                variant="outlined"
+                                fullWidth
+                                value={currentConsulta.data_hora ? new Date(currentConsulta.data_hora).toISOString().slice(0, 16) : ''}
+                                onChange={handleInputChange}
+                                InputLabelProps={{ shrink: true }}
+                                sx={{ mb: 2 }}
+                            />
+
+
+                            <Button variant="contained" color="primary" type="submit">
+                                Marcar
+                            </Button>
+                        </form>
+                    </TelaDialog>
+
+
                 </div>
             </div>
         </div>

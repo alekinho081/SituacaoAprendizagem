@@ -53,13 +53,13 @@ export default function NewHeader() {
     { text: 'Especialidades', icon: <ExplicitIcon />, path: '/especialidades' },
     { text: 'Consultas', icon: <ContactMailIcon />, path: '/admin-consulta' }
   ];
-}else if( tipo === 'paciente'){
+}else if( tipo === 'medico'){
   drawerItems = [
     { text: 'Início', icon: <HomeIcon />, path: '/' },
     { text: 'Especialidades', icon: <ExplicitIcon />, path: '/especialidades' },
     { text: 'Contato', icon: <ContactMailIcon />, path: '/contact' },
   ];
-}else if( tipo === 'medico'){
+}else{
   drawerItems = [
     { text: 'Início', icon: <HomeIcon />, path: '/' },
     { text: 'Especialidades', icon: <ExplicitIcon />, path: '/especialidades' },
