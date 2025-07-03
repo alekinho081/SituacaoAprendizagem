@@ -3,7 +3,7 @@ import CardContent from '@mui/material/CardContent';
 
 const NewCard = ({sx, children, ...other }) => {
     return (
-        <Card sx={{ ...sx }} {...other}>
+        <Card sx={{ ...sx }} {...other} variant='outlined'>
             <CardContent>
                 {children}
             </CardContent>

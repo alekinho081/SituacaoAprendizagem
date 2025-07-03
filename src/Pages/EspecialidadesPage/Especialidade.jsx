@@ -21,7 +21,7 @@ import DeleteButton from "../../Components/Buttons/DeleteButton/DelButton"
 import TelaDialog from "../../Components/Dialog/TelaDialog"
 
 const EspPage = () => {
-    
+
     const [currentConsulta, setCurrentConsulta] = useState(null);
     const [especialidades, setEsp] = useState([]);
     const [showDialog, setShowDialog] = useState(false)
@@ -199,7 +199,11 @@ const EspPage = () => {
                                 name="data_hora"
                                 variant="outlined"
                                 fullWidth
-                                value={currentConsulta.data_hora ? new Date(currentConsulta.data_hora).toISOString().slice(0, 16) : ''}
+                                value={
+                                    currentConsulta && currentConsulta.data_hora
+                                        ? new Date(currentConsulta.data_hora).toISOString().slice(0, 16)
+                                        : ''
+                                }
                                 onChange={handleInputChange}
                                 InputLabelProps={{ shrink: true }}
                                 sx={{ mb: 2 }}
