@@ -98,7 +98,8 @@ router_consultas.post('/consultas', async (req, res) => {
 
         const consulta = await Consulta.create({
             ...req.body,
-            status: 'agendada' // Status padrão
+            status: 'agendada',
+            valor: 180
         });
         
         res.status(201).json(consulta);
@@ -169,6 +170,31 @@ router_consultas.delete('/consultas/:id', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+});
+
+router_consultas.get('/consultas/:tipo/:id', async (req, res) => {
+  try {
+    const { tipo, id } = req.params;
+    
+    let consultas;
+    if (tipo === 'paciente') {
+      consultas = await Consulta.findAll({
+        where: { paciente_id: id },
+        include: [{ model: Medico, as: 'Medico' }]
+      });
+    } else if (tipo === 'medico') {
+      consultas = await Consulta.findAll({
+        where: { medico_id: id },
+        include: [{ model: Paciente, as: 'Paciente' }]
+      });
+    } else {
+      return res.status(400).json({ error: 'Tipo de usuário inválido' });
+    }
+
+    res.json(consultas);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 export default router_consultas;
