@@ -1,7 +1,7 @@
 import Typography from "@mui/material/Typography";
 import NewCard from "../../Components/Card/CardBox";
 import bannerImage from '../../ImagemBanner/ClinicaMedicaSESI.png'
-import { Button, Card, CardMedia } from '@mui/material';
+import { Button, Card, CardMedia, Link } from '@mui/material';
 import Box from "@mui/material/Box";
 
 const Home = () => {
@@ -11,21 +11,20 @@ const Home = () => {
                 <Card
                     sx={{
                         maxWidth: '100%',
-                        width: '1200px',
+                        width: '1500px',
                         borderRadius: 2,
                         overflow: 'hidden',
-                        boxShadow: 3 // Sombra mais pronunciada
+                        boxShadow: 3
                     }}
                 >
                     <CardMedia
                         component="img"
-                        image="/ImagemBanner/ClinicaMedicaSESI.png"
+                        image={bannerImage}
                         alt="Clínica Médica SESI - Cuidamos da sua saúde com excelência"
                         sx={{
                             width: '100%',
-                            height: 'auto',
-                            objectFit: 'contain',
-                            maxHeight: '400px'
+                            height: '400px', // Altura fixa
+                            objectFit: 'cover' // Cobre todo o espaço do card
                         }}
                     />
                 </Card>
@@ -55,7 +54,7 @@ const Home = () => {
                         my: 4
                     }}
                 >
-                    <NewCard sx={{ flex: 1, maxWidth: 490}}>
+                    <NewCard sx={{ flex: 1, maxWidth: 490 }}>
                         <Typography
                             variant="h5"
                             component="h2"
@@ -122,7 +121,7 @@ const Home = () => {
                         my: 2
                     }}
                 >
-                    <Button variant="contained">Agende sua Consulta</Button>
+                    <Button href="/especialidades" variant="contained">Agende sua Consulta</Button>
                 </Box>
             </section>
         </div>
