@@ -15,6 +15,10 @@ import {
   CircularProgress
 } from '@mui/material';
 import NewCard from "../../../Components/Card/CardBox";
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker, TimePicker } from '@mui/x-date-pickers';
+import { ptBR } from 'date-fns/locale';
 
 const ConsultasPage = () => {
   const [consultas, setConsultas] = useState([]);
@@ -110,13 +114,13 @@ const ConsultasPage = () => {
     try {
       setLoading(true);
       await api.patch(`/consultas/${currentConsulta.id}`, currentConsulta);
-      
+
       setSnackbar({
         open: true,
         message: 'Consulta atualizada com sucesso!',
         severity: 'success'
       });
- 
+
       fetchConsultas();
       handleCloseDialog();
     } catch (error) {
@@ -133,12 +137,12 @@ const ConsultasPage = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Data não informada';
-    const options = { 
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit', 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    const options = {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
     };
     return new Date(dateString).toLocaleString('pt-BR', options);
   };
@@ -159,8 +163,8 @@ const ConsultasPage = () => {
           <Typography fontSize={25} fontWeight="bold">
             Consultas Agendadas
           </Typography>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={fetchConsultas}
             disabled={loading}
             startIcon={loading && <CircularProgress size={20} />}
@@ -178,8 +182,8 @@ const ConsultasPage = () => {
             Nenhuma consulta agendada
           </Typography>
         ) : (
-          <div 
-            style={{ 
+          <div
+            style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
               gap: '24px',
@@ -209,11 +213,11 @@ const ConsultasPage = () => {
                 }}
               >
                 <div style={{ width: '100%' }}>
-                  <Typography 
-                    fontSize={20} 
-                    fontWeight="bold" 
+                  <Typography
+                    fontSize={20}
+                    fontWeight="bold"
                     textAlign="center"
-                    sx={{ 
+                    sx={{
                       color: getStatusColor(consulta.status),
                       marginBottom: 1
                     }}
@@ -229,10 +233,10 @@ const ConsultasPage = () => {
                   <Typography fontSize={16} textAlign="center" sx={{ mt: 1 }}>
                     {formatDate(consulta.data_hora)}
                   </Typography>
-                  <Typography 
-                    fontSize={16} 
+                  <Typography
+                    fontSize={16}
                     textAlign="center"
-                    sx={{ 
+                    sx={{
                       color: getStatusColor(consulta.status),
                       fontWeight: 'bold',
                       mt: 1
@@ -241,11 +245,11 @@ const ConsultasPage = () => {
                     {statusOptions.find(s => s.value === consulta.status)?.label || 'Sem status'}
                   </Typography>
                 </div>
-                
+
                 <Button
                   variant="contained"
                   sx={{
-                    borderRadius: "0.5rem", 
+                    borderRadius: "0.5rem",
                     textTransform: "none",
                     backgroundColor: '#1976d2',
                     '&:hover': {
@@ -268,6 +272,7 @@ const ConsultasPage = () => {
           <DialogContent>
             {currentConsulta && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '10px' }}>
+                {/* Primeira linha */}
                 <TextField
                   label="Médico"
                   value={currentConsulta.Medico?.nome || 'Não informado'}
@@ -284,6 +289,8 @@ const ConsultasPage = () => {
                   disabled
                   sx={{ mb: 2 }}
                 />
+
+                {/* Segunda linha */}
                 <TextField
                   label="Paciente"
                   value={currentConsulta.Paciente?.nome || 'Não informado'}
@@ -300,17 +307,59 @@ const ConsultasPage = () => {
                   disabled
                   sx={{ mb: 2 }}
                 />
-                <TextField
-                  label="Data e Hora"
-                  type="datetime-local"
-                  name="data_hora"
-                  value={currentConsulta.data_hora ? new Date(currentConsulta.data_hora).toISOString().slice(0, 16) : ''}
-                  onChange={handleInputChange}
-                  variant="outlined"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  sx={{ mb: 2 }}
-                />
+
+                {/* Terceira linha - Data e Hora Separadas */}
+                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
+                  <DatePicker
+                    label="Data"
+                    value={currentConsulta.data_hora ? new Date(currentConsulta.data_hora) : null}
+                    onChange={(newValue) => {
+                      setCurrentConsulta(prev => ({
+                        ...prev,
+                        data_hora: newValue ? new Date(newValue).toISOString() : null
+                      }));
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        required
+                        sx={{ mb: 2 }}
+                      />
+                    )}
+                    minDate={new Date()}
+                  />
+                </LocalizationProvider>
+
+                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
+                  <TimePicker
+                    label="Hora"
+                    value={currentConsulta.data_hora ? new Date(currentConsulta.data_hora) : null}
+                    onChange={(newValue) => {
+                      if (newValue && currentConsulta.data_hora) {
+                        const date = new Date(currentConsulta.data_hora);
+                        date.setHours(newValue.getHours());
+                        date.setMinutes(newValue.getMinutes());
+                        setCurrentConsulta(prev => ({
+                          ...prev,
+                          data_hora: date.toISOString()
+                        }));
+                      }
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        required
+                        sx={{ mb: 2 }}
+                      />
+                    )}
+                    minutesStep={15}
+                    ampm={false}
+                  />
+                </LocalizationProvider>
+
+                {/* Quarta linha */}
                 <TextField
                   select
                   label="Status"
@@ -327,6 +376,8 @@ const ConsultasPage = () => {
                     </MenuItem>
                   ))}
                 </TextField>
+
+                {/* Campos multilinha */}
                 <TextField
                   label="Motivo"
                   name="motivo"
@@ -391,9 +442,9 @@ const ConsultasPage = () => {
             <Button onClick={handleCloseDialog} disabled={loading}>
               Cancelar
             </Button>
-            <Button 
-              onClick={handleSaveConsulta} 
-              color="primary" 
+            <Button
+              onClick={handleSaveConsulta}
+              color="primary"
               variant="contained"
               disabled={loading}
               startIcon={loading && <CircularProgress size={20} />}
@@ -403,15 +454,15 @@ const ConsultasPage = () => {
           </DialogActions>
         </Dialog>
 
-      
+
         <Snackbar
           open={snackbar.open}
           autoHideDuration={6000}
           onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
-          <Alert 
-            onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
+          <Alert
+            onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
             severity={snackbar.severity}
             sx={{ width: '100%' }}
           >

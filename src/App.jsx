@@ -8,6 +8,7 @@ import AdminMedico from './Pages/AdminPage/MedicPageADM/MedicoADM';
 import AdminConsulta from './Pages/AdminPage/ConsultaPageADM/ConsultaADM'
 import AdminPaciente from './Pages/AdminPage/PacientePageADM/PacienteADM'
 import EspPage from './Pages/EspecialidadesPage/Especialidade';
+import Perfil from './Pages/Perfil/Perfil';
 
 function App() {
   return (
@@ -21,7 +22,7 @@ function App() {
             <Route path='/admin-medico' element={<AdminMedico />} />
             <Route path='/admin-paciente' element={<AdminPaciente />} />
             <Route path='/admin-consulta' element={<AdminConsulta />} />
-           
+            <Route path='/perfil' element={<Perfil />}/>
 
           </Route>
 

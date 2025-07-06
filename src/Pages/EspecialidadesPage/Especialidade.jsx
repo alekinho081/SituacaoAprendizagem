@@ -1,75 +1,202 @@
 import {
     Typography,
     Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
     TextField,
     MenuItem,
     Snackbar,
     Alert,
-    CircularProgress
+    Box
 } from '@mui/material';
-
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { ptBR } from 'date-fns/locale';
+import Cookies from 'js-cookie';
+import ConsultaForm from "../../Components/consultaForm/consultaForm";
 import NewCard from "../../Components/Card/CardBox";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import NewInput from "../../Components/Input/Input"
-import EditButton from "../../Components/Buttons/EditButton/EditButton"
-import DeleteButton from "../../Components/Buttons/DeleteButton/DelButton"
-import TelaDialog from "../../Components/Dialog/TelaDialog"
+import TelaDialog from "../../Components/Dialog/TelaDialog";
 
 const EspPage = () => {
-
-    const [currentConsulta, setCurrentConsulta] = useState(null);
+    const [currentConsulta, setCurrentConsulta] = useState({
+        motivo: '',
+        medico_id: '',
+        date: null,
+        time: null,
+        paciente_id: localStorage.getItem('id')
+    });
     const [especialidades, setEsp] = useState([]);
-    const [showDialog, setShowDialog] = useState(false)
-    const [medicos, setMedicos] = useState([])
-    const [espMedicos, setEspMedicos] = useState([])
-    const [currentMedico, setCurrentMedico] = useState('')
+    const [showDialog, setShowDialog] = useState(false);
+    const [medicos, setMedicos] = useState([]);
+    const [espMedicos, setEspMedicos] = useState([]);
+    const [horariosOcupados, setHorariosOcupados] = useState([]);
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
 
-    const abreDialog = (especialidade) => {
-        let medics = medicos
-            .filter(medico => medico.especialidade == especialidade)
-            .map(medico => {
-                return { nome: medico.nome, id: medico.id };
-            });
-        setEspMedicos(medics)
-        setShowDialog(true)
-        console.log(medics)
-    }
+    // Configuração do axios
+    axios.defaults.withCredentials = true;
+    axios.interceptors.request.use(config => {
+        const token = Cookies.get('jwt');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    });
 
-    const fechaDialog = () => {
-        setShowDialog(false)
-    }
+    const abreDialog = async (especialidade) => {
+        try {
+            const medics = medicos
+                .filter(medico => medico.especialidade === especialidade)
+                .map(medico => ({ nome: medico.nome, id: medico.id }));
 
-
-    const handleInputChange = (e) => {
-        const { nome, value } = e.target;
-        setCurrentMedico(e.target.value)
-        console.log(e.target.value)
+            setEspMedicos(medics);
+            setCurrentConsulta(prev => ({
+                ...prev,
+                especialidade: especialidade
+            }));
+            setShowDialog(true);
+        } catch (error) {
+            console.error("Erro ao abrir dialog:", error);
+        }
     };
 
+    const fechaDialog = () => {
+        setShowDialog(false);
+        setCurrentConsulta({
+            motivo: '',
+            medico_id: '',
+            date: null,
+            time: null,
+            paciente_id: 1
+        });
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setCurrentConsulta(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleDateChange = (newDate) => {
+        const day = newDate.getDay();
+        if (day === 0 || day === 6) {
+            setSnackbar({
+                open: true,
+                message: 'Consultas só podem ser agendadas de segunda a sexta',
+                severity: 'error'
+            });
+            return;
+        }
+
+        setCurrentConsulta(prev => ({
+            ...prev,
+            date: newDate
+        }));
+
+        if (currentConsulta.medico_id) {
+            fetchHorariosOcupados();
+        }
+    };
+
+    const handleTimeChange = (newTime) => {
+        const hours = newTime.getHours();
+        if (hours < 8 || hours >= 18) {
+            setSnackbar({
+                open: true,
+                message: 'Consultas só podem ser agendadas entre 8h e 18h',
+                severity: 'error'
+            });
+            return;
+        }
+
+        setCurrentConsulta(prev => ({
+            ...prev,
+            time: newTime
+        }));
+
+        if (currentConsulta.medico_id && currentConsulta.date) {
+            fetchHorariosOcupados();
+        }
+    };
+
+    const fetchHorariosOcupados = async () => {
+        try {
+            const response = await axios.get(
+                `http://localhost:5000/v1/consultas/medico/${currentConsulta.medico_id}`
+            );
+            setHorariosOcupados(response.data.map(c => new Date(c.data_hora).getTime()));
+        } catch (error) {
+            console.error("Erro ao buscar horários ocupados:", error);
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!currentConsulta.date || !currentConsulta.time) {
+            setSnackbar({
+                open: true,
+                message: 'Por favor, selecione data e hora',
+                severity: 'error'
+            });
+            return;
+        }
+
+        // Combina data e hora
+        const dataHora = new Date(currentConsulta.date);
+        const time = new Date(currentConsulta.time);
+        dataHora.setHours(time.getHours());
+        dataHora.setMinutes(time.getMinutes());
+
+        try {
+            // Verifica conflito de horário
+            if (horariosOcupados.includes(dataHora.getTime())) {
+                setSnackbar({
+                    open: true,
+                    message: 'Este horário já está ocupado',
+                    severity: 'error'
+                });
+                return;
+            }
+
+            // Envia para o backend
+            await axios.post('http://localhost:5000/v1/consultas', {
+                motivo: currentConsulta.motivo,
+                medico_id: currentConsulta.medico_id,
+                data_hora: dataHora.toISOString(),
+                paciente_id: currentConsulta.paciente_id
+            });
+
+            setSnackbar({
+                open: true,
+                message: 'Consulta agendada com sucesso!',
+                severity: 'success'
+            });
+
+            fechaDialog();
+        } catch (error) {
+            setSnackbar({
+                open: true,
+                message: error.response?.data?.error || 'Erro ao agendar consulta',
+                severity: 'error'
+            });
+        }
+    };
 
     const mostraEspecialidades = async () => {
         try {
             const resp = await axios.get("http://localhost:5000/v1/medicos");
+            setMedicos(resp.data);
 
-            setMedicos(resp.data)
-
-            const agrupado = {};
-
-            resp.data.forEach((medico) => {
-                const esp = medico.especialidade;
-
-                if (esp in agrupado) {
-                    agrupado[esp]++;
-                } else {
-                    agrupado[esp] = 1;
-                }
-            });
-
+            const agrupado = resp.data.reduce((acc, medico) => {
+                acc[medico.especialidade] = (acc[medico.especialidade] || 0) + 1;
+                return acc;
+            }, {});
 
             const listaEspecialidades = Object.entries(agrupado).map(
                 ([especialidade, qtd_medicos]) => ({
@@ -81,6 +208,11 @@ const EspPage = () => {
             setEsp(listaEspecialidades);
         } catch (error) {
             console.error("Erro ao buscar especialidades: ", error);
+            setSnackbar({
+                open: true,
+                message: 'Erro ao carregar especialidades',
+                severity: 'error'
+            });
         }
     };
 
@@ -95,16 +227,14 @@ const EspPage = () => {
                     Especialidades
                 </Typography>
 
-                <div
-                    style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(4, 1fr)',
-                        gap: '24px',
-                        justifyItems: 'center',
-                        maxWidth: '1100px',
-                        margin: '0 auto'
-                    }}
-                >
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    gap: '24px',
+                    justifyItems: 'center',
+                    maxWidth: '1100px',
+                    margin: '0 auto'
+                }}>
                     {especialidades.map((esp, index) => (
                         <NewCard
                             key={index}
@@ -137,7 +267,7 @@ const EspPage = () => {
                                 {esp.especialidade}
                             </Typography>
                             <Typography fontSize={15} textAlign={"center"}>
-                                Medicos disponiveis para essa especialidade:
+                                Médicos disponíveis para essa especialidade:
                             </Typography>
                             <Typography
                                 fontSize={16}
@@ -160,65 +290,84 @@ const EspPage = () => {
                                     },
                                     padding: '8px 24px'
                                 }}
-                                onClick={() => { abreDialog(esp.especialidade) }}
+                                onClick={() => abreDialog(esp.especialidade)}
                             >
                                 Marcar Consulta
                             </Button>
                         </NewCard>
-
                     ))}
-                    <TelaDialog abre={showDialog} onClose={fechaDialog} title="Marcar consulta" disableEnforceFocus>
-                        <form >
-                            <TextField
-                                label={'Motivo'}
-                                onChange={(e) => console.log(e.target.value)}
-                                required={true}
-                                sx={{ mb: 2 }}
-                                fullWidth
-                            />
-                            <TextField
-                                select
-                                label="Medico"
-                                name="Medico"
-                                value={currentMedico}
-                                onChange={handleInputChange}
-
-                                variant="outlined"
-                                fullWidth
-                                sx={{ mb: 2 }}
-                            >
-                                {espMedicos.map((medico) => (
-                                    <MenuItem key={medico.id} value={medico.nome}>
-                                        {medico.nome}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-                            <TextField
-                                label="Data e Hora"
-                                type="datetime-local"
-                                name="data_hora"
-                                variant="outlined"
-                                fullWidth
-                                value={
-                                    currentConsulta && currentConsulta.data_hora
-                                        ? new Date(currentConsulta.data_hora).toISOString().slice(0, 16)
-                                        : ''
-                                }
-                                onChange={handleInputChange}
-                                InputLabelProps={{ shrink: true }}
-                                sx={{ mb: 2 }}
-                            />
-
-
-                            <Button variant="contained" color="primary" type="submit">
-                                Marcar
-                            </Button>
-                        </form>
-                    </TelaDialog>
-
-
                 </div>
+
+                <TelaDialog abre={showDialog} onClose={fechaDialog} title="Marcar consulta">
+                    <form onSubmit={handleSubmit}>
+                        <TextField
+                            label="Motivo"
+                            name="motivo"
+                            value={currentConsulta.motivo}
+                            onChange={handleInputChange}
+                            required
+                            fullWidth
+                            sx={{ mb: 2 }}
+                        />
+
+                        <TextField
+                            select
+                            label="Médico"
+                            name="medico_id"
+                            value={currentConsulta.medico_id}
+                            onChange={(e) => {
+                                handleInputChange(e);
+                                if (currentConsulta.date) {
+                                    fetchHorariosOcupados();
+                                }
+                            }}
+                            required
+                            fullWidth
+                            sx={{ mb: 2 }}
+                        >
+                            {espMedicos.map((medico) => (
+                                <MenuItem key={medico.id} value={medico.id}>
+                                    {medico.nome}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+
+                        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
+                            <ConsultaForm 
+                                date={currentConsulta.date}
+                                time={currentConsulta.time}
+                                onDateChange={handleDateChange}
+                                onTimeChange={handleTimeChange}
+                            />
+                        </LocalizationProvider>
+
+                        <Button 
+                            variant="contained" 
+                            type="submit"
+                            fullWidth
+                            sx={{ mt: 2 }}
+                            disabled={!currentConsulta.motivo || !currentConsulta.medico_id || 
+                                     !currentConsulta.date || !currentConsulta.time}
+                        >
+                            Agendar Consulta
+                        </Button>
+                    </form>
+                </TelaDialog>
             </div>
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+            >
+                <Alert
+                    onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+                    severity={snackbar.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </div>
     );
 };
