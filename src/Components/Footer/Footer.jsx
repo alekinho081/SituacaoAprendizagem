@@ -1,6 +1,7 @@
 const Footer = () => {
   return (
     <footer style={{ backgroundColor: '#fff', color: '#333', fontSize: 14, fontFamily: 'Arial, sans-serif' }}>
+      <hr  style={{opacity: '0.2'}}/>  
       <div
         style={{
           maxWidth: 1200,

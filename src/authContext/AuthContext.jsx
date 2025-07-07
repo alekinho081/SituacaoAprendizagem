@@ -5,55 +5,57 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // Adicionando estado de loading
+  const [loading, setLoading] = useState(true);
 
+  // Verifica a autenticação do usuário
   const checkAuth = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/v1/check-auth', {
+      const response = await axios.get('http://localhost:5000/v1/check-auth', {
         withCredentials: true,
       });
-      setUser(res.data.user);
-      // Sincroniza com localStorage
-      if (res.data.user) {
-        localStorage.setItem('tipo', res.data.user.tipo);
-        localStorage.setItem('id', res.data.user.id);
+      
+      setUser(response.data.user);
+
+      if (response.data.user) {
+        localStorage.setItem('userType', response.data.user.type);
+        localStorage.setItem('userId', response.data.user.id);
       } else {
-        localStorage.removeItem('tipo');
-        localStorage.removeItem('id');
+        localStorage.removeItem('userType');
+        localStorage.removeItem('userId');
       }
     } catch (error) {
       setUser(null);
-      localStorage.removeItem('tipo');
-      localStorage.removeItem('id');
+      localStorage.removeItem('userType');
+      localStorage.removeItem('userId');
     } finally {
       setLoading(false);
     }
   };
 
-  // Função para login que atualiza o contexto
+  // Função de login
   const login = async (credentials) => {
     try {
-      const res = await axios.post('http://localhost:5000/v1/login', credentials, {
+      const response = await axios.post('http://localhost:5000/v1/login', credentials, {
         withCredentials: true,
       });
-      setUser(res.data.user);
-      localStorage.setItem('tipo', res.data.user.tipo);
-      localStorage.setItem('id', res.data.user.id);
-      return res.data;
+      setUser(response.data.user);
+      localStorage.setItem('userType', response.data.user.type);
+      localStorage.setItem('userId', response.data.user.id);
+      return response.data;
     } catch (error) {
       throw error;
     }
   };
 
-  // Função para logout que limpa o contexto
+  // Função de logout
   const logout = async () => {
     try {
       await axios.get('http://localhost:5000/v1/logout', {
         withCredentials: true,
       });
       setUser(null);
-      localStorage.removeItem('tipo');
-      localStorage.removeItem('id');
+      localStorage.removeItem('userType');
+      localStorage.removeItem('userId');
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -62,8 +64,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     checkAuth();
     
-    // Verifica autenticação periodicamente (opcional)
-    const interval = setInterval(checkAuth, 300000); // 5 minutos
+    // Verifica autenticação a cada 5 minutos
+    const interval = setInterval(checkAuth, 300000);
     
     return () => clearInterval(interval);
   }, []);
