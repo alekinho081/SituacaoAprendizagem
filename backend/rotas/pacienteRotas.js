@@ -67,13 +67,13 @@ router_pacientes.put('/pacientes/:id', async (req, res) => {
             return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
         }
 
-  
+
         const paciente = await Paciente.findByPk(req.params.id);
         if (!paciente) {
             return res.status(404).json({ error: 'Paciente não encontrado' });
         }
 
-    
+
         if (req.body.email !== paciente.email) {
             const emailExistente = await Paciente.findOne({
                 where: {
@@ -167,7 +167,7 @@ router_pacientes.post('/login', async (req, res) => {
     try {
         const { email, senha } = req.body;
 
-        
+
         const [paciente, medico, admin] = await Promise.all([
             Paciente.findOne({ where: { email } }),
             Medico.findOne({ where: { email } }),
@@ -182,16 +182,16 @@ router_pacientes.post('/login', async (req, res) => {
             return res.status(404).json({ error: 'Usuário não encontrado' });
         }
 
- 
+
         const senhaValida = await bcrypt.compare(senha, usuario.senha);
         if (!senhaValida) {
             return res.status(401).json({ error: 'Senha incorreta' });
         }
 
         const token = jwt.sign(
-            { 
+            {
                 id: usuario.id,
-                tipo: tipoUsuario,  
+                tipo: tipoUsuario,
                 email: usuario.email
             },
             process.env.JWT_SECRET,
@@ -224,34 +224,37 @@ router_pacientes.post('/login', async (req, res) => {
 
 router_pacientes.get('/check-auth', async (req, res) => {
     try {
-      const token = req.cookies.jwt; 
-  
-      if (!token) {
-        return res.status(401).json({ isAuthenticated: false });
-      }
-  
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const paciente = await Paciente.findByPk(decoded.id);
-  
-      if (!paciente) {
-        return res.status(401).json({ isAuthenticated: false });
-      }
-  
-      res.json({ 
-        isAuthenticated: true,
-        user: { id: paciente.id, email: paciente.email, nome: paciente.nome }
-      });
-    } catch (error) {
-      res.status(401).json({ isAuthenticated: false });
-    }
-  });
+        const token = req.cookies.jwt;
 
-router_pacientes.get('/logout', (req, res) => {
-  res.clearCookie('jwt'); 
-  res.status(200).json({ message: 'Logout successful' });
+        if (!token) {
+            return res.status(401).json({ isAuthenticated: false });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const paciente = await Paciente.findByPk(decoded.id);
+
+        if (!paciente) {
+            return res.status(401).json({ isAuthenticated: false });
+        }
+
+        res.json({
+            isAuthenticated: true,
+            user: {
+                id: paciente.id,
+                email: paciente.email,
+                name: paciente.name,
+                type: paciente.type 
+            }
+        });
+    } catch (error) {
+        res.status(401).json({ isAuthenticated: false });
+    }
 });
 
-
+router_pacientes.get('/logout', (req, res) => {
+    res.clearCookie('jwt');
+    res.status(200).json({ message: 'Logout successful' });
+});
 
 
 export default router_pacientes;

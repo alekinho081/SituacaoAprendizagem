@@ -9,20 +9,32 @@ import AdminConsulta from './Pages/AdminPage/ConsultaPageADM/ConsultaADM'
 import AdminPaciente from './Pages/AdminPage/PacientePageADM/PacienteADM'
 import EspPage from './Pages/EspecialidadesPage/Especialidade';
 import Perfil from './Pages/Perfil/Perfil';
+import PrivateRoute from './Components/PrivateRoute'
 
 function App() {
   return (
     <div>
+
       <BrowserRouter>
         <Routes>
           <Route path='/' element={<Layout />} >
             <Route index element={<Home />} />
             <Route path='/consulta' element={<Consulta />} />
-            <Route path='/especialidades' element={<EspPage/>} />
-            <Route path='/admin-medico' element={<AdminMedico />} />
-            <Route path='/admin-paciente' element={<AdminPaciente />} />
-            <Route path='/admin-consulta' element={<AdminConsulta />} />
-            <Route path='/perfil' element={<Perfil />}/>
+            <Route path='/especialidades' element={<EspPage />} />
+
+            <Route path='/admin-medico' element={
+              < PrivateRoute tipoUsuarioRequerido="admin" >
+                <AdminMedico />
+              </PrivateRoute >} />
+            <Route path='/admin-paciente' element={
+              < PrivateRoute tipoUsuarioRequerido="admin" >
+                <AdminPaciente />
+              </PrivateRoute >} />
+            <Route path='/admin-consulta' element={
+              < PrivateRoute tipoUsuarioRequerido="admin" >
+                <AdminConsulta />
+              </PrivateRoute >} />
+            <Route path='/perfil' element={<Perfil />} />
 
           </Route>
 

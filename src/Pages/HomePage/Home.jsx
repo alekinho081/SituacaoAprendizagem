@@ -11,7 +11,7 @@ const Home = () => {
                 <Card
                     sx={{
                         maxWidth: '100%',
-                        width: '1500px',
+                        width: '100%',
                         borderRadius: 2,
                         overflow: 'hidden',
                         boxShadow: 3
@@ -23,8 +23,8 @@ const Home = () => {
                         alt="Clínica Médica SESI - Cuidamos da sua saúde com excelência"
                         sx={{
                             width: '100%',
-                            height: '400px', // Altura fixa
-                            objectFit: 'cover' // Cobre todo o espaço do card
+                            height: '400px', 
+                            objectFit: 'cover' 
                         }}
                     />
                 </Card>
