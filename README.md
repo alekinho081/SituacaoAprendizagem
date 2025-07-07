@@ -85,9 +85,3 @@ O backend estará disponível em:
 
 ### Banco de Dados
 - **PostgreSQL**
-
-## 📝 Notas Adicionais
-
-- Certifique-se de que o servidor PostgreSQL está em execução antes de iniciar o backend
-- O backend deve ser executado primeiro para que o frontend possa fazer as requisições
-- Para desenvolvimento, configure o CORS adequadamente no backend
